@@ -8,4 +8,4 @@ Twitch Viewer Bot (Python + proxies)
 <b>Use: </b>
 	<pre><p>	~\viewerbot>python threads_viewer.py your_channel_name max_nb_of_threads</p></pre>
 <b>Exemple: </b>
-	<pre><p>	~\viewerbot><b>python threads_viewer.py RANDOMCHANNEL 1000</b></p></pre>
+	<pre><p>	~\viewerbot><b>python threads_viewer.py channel_name 1000</b></p></pre>

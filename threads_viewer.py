@@ -1,5 +1,6 @@
 import requests
-from livestreamer import Livestreamer
+from streamlink import Streamlink, NoPluginError, PluginError
+import streamlink
 import sys
 import time
 import random
@@ -19,7 +20,7 @@ nb_of_proxies = 0
 
 # Session creating for request
 ua = UserAgent()
-session = Livestreamer()
+session = Streamlink()
 session.set_option("http-headers", {'User-Agent': ua.random, "Client-ID": "ewvlchtxgqq88ru9gmfp1gmyt6h2b93"})
 
 
@@ -57,25 +58,36 @@ def get_proxies():
 
 
 def get_url():
-    url = ""
+    # Other options are available such as 'best', 'audio_only'
+    # Docks available https://streamlink.github.io/index.html
+    quality = 'worst'
+
+    # Attempt to fetch streams
     try:
         streams = session.streams(channel_url)
-        try:
-            url = streams['audio_only'].url
-        except:
-            url = streams['worst'].url
-    except:
-        print("Wasnt able to get url")
-    return url
+    except NoPluginError:
+        exit("Streamlink is unable to handle the URL '{0}'".format(channel_url))
+    except PluginError as err:
+        exit("Plugin error: {0}".format(err))
 
-def open_url(proxy_data):
+    if not streams:
+        exit("No streams found on URL '{0}'".format(channel_url))
+
+    # Look for specified stream
+    if quality not in streams:
+        exit("Unable to find '{0}' stream on URL '{1}'".format(quality, channel_url))
+
+    # We found the stream
+    return streams[quality].url
+
+def open_url(proxy_data, url):
     try:
         global all_proxies
         headers = {'User-Agent': ua.random}
         current_index = all_proxies.index(proxy_data)
 
         if proxy_data['url'] == "":
-            proxy_data['url'] = get_url()
+            proxy_data['url'] = url
         current_url = proxy_data['url']
         try:
              if time.time() - proxy_data['time'] >= random.randint(1, 5):
@@ -86,6 +98,7 @@ def open_url(proxy_data):
                 proxy_data['time'] = time.time()
                 all_proxies[current_index] = proxy_data
         except:
+            # Most of times this will fail, because proxy is not responding
             print("************* Connection Error! *************")
 
     except (KeyboardInterrupt, SystemExit):
@@ -93,11 +106,24 @@ def open_url(proxy_data):
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) == 1:
+    # python threads_viewer.py channel_name
+    if len(sys.argv) == 2:
         channel_url = "https://www.twitch.tv/" + sys.argv[1]
+
+    elif len(sys.argv) == 3:
+        # python threads_viewer.py channel_name 1000
+        # sys.argv[0] is the file path
+        # sys.argv[1] is the channel name "channel_name"
+        # sys.argv[2] is the number of threads to use
+        channel_url = "https://www.twitch.tv/" + sys.argv[1]
+        max_nb_of_threads = int(sys.argv[2])
+    
     else:
-        channel_url = "https://www.twitch.tv/your_channel_name"
+        print("Format must be: python threads_viewer.py channel_name 1000")
+        sys.exit()
+
+    print("Loading channel %s with %i threads." % (channel_url, max_nb_of_threads))
+        
     start_time = time.time()
     proxies = get_proxies()
     
@@ -110,11 +136,16 @@ if __name__ == "__main__":
 
     while True:
         try:
+            url = get_url()
+        except: 
+            print("We were unable to get a stream url for %s " % channel_url)
+            sys.exit()
+        try:
             for i in range(0, max_nb_of_threads):
-                threaded = Thread(target=open_url, args=(all_proxies[random.randint(0, len(all_proxies))],))
+                threaded = Thread(target=open_url, args=(all_proxies[random.randint(0, len(all_proxies))], url))
                 threaded.daemon = True  # This thread dies when main thread (only non-daemon thread) exits.
                 threaded.start()
         except:
             print_exception()
         shuffle(all_proxies)
-        time.sleep(5)
+        time.sleep(20)
