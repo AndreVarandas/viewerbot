@@ -1,11 +1,30 @@
 # viewerbot
-Twitch Viewer Bot (Python + proxies)
-<p>Simple <b>twitch viewer bot</b> witch requires a large amount of proxies ( if you want to use public proxies. <b>Works better with private proxies</b>) to generate <b>views</b> for specific stream.<p>
+Twitch Viewer Bot (Python + Proxies)
 
 
-<h3>To install <b>requirements.txt :</b></h3> 
-	 <pre><p>	<i>pip install -r requirements.txt</i></p></pre>
-<b>Use: </b>
-	<pre><p>	~\viewerbot>python threads_viewer.py your_channel_name max_nb_of_threads</p></pre>
-<b>Exemple: </b>
-	<pre><p>	~\viewerbot><b>python threads_viewer.py channel_name 1000</b></p></pre>
+Simple **twitch viewer bot** that no longer works.
+
+
+Twitch seems to disregard and no longer count viewers coming from livestream or streamlink.
+
+
+---s
+
+Requires a large amount of proxies (if you want to use public proxies. **Works better with private proxies**) to generate views for specific stream.
+
+
+### Install with
+
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+```bash
+~\viewerbot>python threads_viewer.py your_channel_name max_nb_of_threads
+```
+
+### Example
+```bash
+~\viewerbot>python threads_viewer.py channel_name 1000
+```
